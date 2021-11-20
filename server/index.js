@@ -5,6 +5,7 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 
 import postsRoutes from './routes/posts.js'
+import userRoutes from './routes/user.js'
 
 const app = express()
 dotenv.config()
@@ -26,3 +27,4 @@ mongoose.connect(process.env.CONNECTION_URL, {
 
 // mongoose.set('useFindAndModify', false) // also just added to avoid warrings in console
 app.use('/posts', postsRoutes)
+app.use('/user', userRoutes)
