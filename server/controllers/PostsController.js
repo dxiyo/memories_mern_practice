@@ -55,10 +55,27 @@ class PostsController {
 
     static like = async (req, res) => {
         const {id: _id} = req.params
+        
+        // thanks to the auth middleware, we can check if the user is signed in by checking if req.userId, which was added in the auth middleware, exists or not.
+        if (!req.userId) return res.json({ message: "Unauthenticated" }) 
+        
         if (!mongoose.Types.ObjectId.isValid(_id)) return res.status(404).send('No post with that id')
 
         const post = await Post.findById(_id)
-        const updatedPost = await Post.findByIdAndUpdate(_id, {likeCount: post.likeCount + 1}, { new: true } )
+
+        // check if the id of the user exists in the post likes using the index function. if the index of the users id is -1 that means it's not there which means the user didnt like before.
+        const index = post.likes.findIndex( id => id === String(req.userId) )
+
+        // if the user never liked before (if index is -1) like it, else unlike it
+        if (index === -1) {
+            // likes the post
+            post.likes.push(req.userId)
+        } else {
+            // unlikes the post
+            post.likes.filter(id => id !== req.userId)
+        }
+
+        const updatedPost = await Post.findByIdAndUpdate(_id, post, { new: true } )
 
         res.json(updatedPost)
     }
